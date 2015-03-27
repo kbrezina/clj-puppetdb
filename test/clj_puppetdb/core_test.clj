@@ -1,6 +1,7 @@
 (ns clj-puppetdb.core-test
   (:require [clojure.test :refer :all]
-            [clj-puppetdb.core :refer :all])
+            [clj-puppetdb.core :refer :all]
+            [puppetlabs.certificate-authority.core :as ssl])
   (:import [java.io File]))
 
 (defn- to-url [file]
@@ -14,18 +15,18 @@
     (let [conn (connect "http://localhost:8080" {:vcr-dir "/temp"})]
       (is (= conn {:host "http://localhost:8080" :opts {:vcr-dir "/temp"}}))))
   (testing "Should accept https://puppetdb:8081 with a map of (dummy) certs"
-    (let [opts {:ssl-ca-cert (to-url "src/clj_puppetdb/core.clj")
-                :ssl-cert    (to-url "src/clj_puppetdb/core.clj")
-                :ssl-key     (to-url "src/clj_puppetdb/core.clj")
+    (let [opts {:ssl-ca-cert (to-url "./dev-resources/certs/ca-cert.pem")
+                :ssl-cert    (to-url "./dev-resources/certs/cert.pem")
+                :ssl-key     (to-url "./dev-resources/certs/key.pem")
                 :vcr-dir     nil}
           conn (connect "https://puppetdb:8081" opts)]
       ;; I'm only testing for truthiness of conn here. Schema validation should handle the rest,
       ;; and testing equality with java.io.File objects doesn't seem to work.
       (is conn)))
   (testing "Should accept https://puppetdb:8081 with a map of (dummy) certs and VCR enabled"
-    (let [opts {:ssl-ca-cert (to-url "src/clj_puppetdb/core.clj")
-                :ssl-cert    (to-url "src/clj_puppetdb/core.clj")
-                :ssl-key     (to-url "src/clj_puppetdb/core.clj")
+    (let [opts {:ssl-ca-cert (to-url "./dev-resources/certs/ca-cert.pem")
+                :ssl-cert    (to-url "./dev-resources/certs/cert.pem")
+                :ssl-key     (to-url "./dev-resources/certs/key.pem")
                 :vcr-dir     "/temp"}
           conn (connect "https://puppetdb:8081" opts)]
       ;; I'm testing for truthiness of conn here. Schema validation should handle the rest except the VCR piece,

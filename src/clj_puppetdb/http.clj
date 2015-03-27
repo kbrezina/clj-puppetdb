@@ -5,6 +5,7 @@
             [clj-puppetdb.schema :refer [Client]]
             [clj-puppetdb.util :refer [file?]]
             [clj-puppetdb.vcr :refer [vcr-get]]
+            [puppetlabs.certificate-authority.core :as ssl]
             [puppetlabs.http.client.sync :as http]
             [schema.core :as s])
   (:import [java.io IOException]
@@ -15,14 +16,18 @@
 ;;     exists, but needs work before it can be used.
 
 (defn- make-https-client
-  [^String host {:keys [ssl-ca-cert ssl-cert ssl-key vcr-dir]}]
-  {:pre  [(every? file? [ssl-ca-cert ssl-cert ssl-key])
+  [^String host {:keys [ssl-context ssl-ca-cert ssl-cert ssl-key vcr-dir] :as opts}]
+  {:pre  [(or ssl-context
+              (every? #(or (file? (get opts %))
+                           (throw (IllegalArgumentException.
+                             (format "The following file does not exist: %s=%s" % (get opts %)))))
+                      [:ssl-ca-cert :ssl-cert :ssl-key]))
           (.startsWith host "https://")]
    :post [(s/validate Client %)]}
   {:host host
-   :opts {:ssl-ca-cert ssl-ca-cert
-          :ssl-cert    ssl-cert
-          :ssl-key     ssl-key
+   :opts {:ssl-context (if ssl-context
+                         ssl-context
+                         (ssl/pems->ssl-context ssl-cert ssl-key ssl-ca-cert))
           :vcr-dir     vcr-dir}})
 
 (defn- make-http-client

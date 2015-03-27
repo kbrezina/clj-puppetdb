@@ -4,4 +4,6 @@
 
 (defn file?
   [^URL f]
-  (-> f .toURI File. .isFile))
+  (if (nil? f)
+    false
+    (-> f .toURI File. .isFile)))
