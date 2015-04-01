@@ -24,5 +24,4 @@
   :repl-options {:init (do (require 'spyscope.core)
                            (use 'clj-puppetdb.testutils.repl))}
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.5"]
-                                  [spyscope "0.1.5" :exclusions [clj-time]]
-                                  [puppetlabs/trapperkeeper-webserver-jetty9 "1.1.0"]]}})
+                                  [spyscope "0.1.5" :exclusions [clj-time]]]}})
